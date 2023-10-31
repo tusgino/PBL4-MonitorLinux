@@ -25,7 +25,17 @@ public class HostProcess {
     private String start;
     private String time;
     private String readableName;
+    
     private boolean monitored;
+    private Long timeStartFollow;
+    
+    public Long getTimeStartFollow() {
+        return timeStartFollow;
+    }
+
+    public void setTimeStartFollow(Long timeStartFollow) {
+        this.timeStartFollow = timeStartFollow;
+    }
 
     private List<Long> memoryLogs;
     private BooleanProperty mProperty;
