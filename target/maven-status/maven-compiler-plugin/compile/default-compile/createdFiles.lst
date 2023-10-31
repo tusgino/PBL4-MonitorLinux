@@ -1,3 +1,12 @@
-com\pbl4\monitor\App.class
+com\pbl4\views\MainStage$2.class
+com\pbl4\views\ProcessCell.class
+com\pbl4\views\MainStage$1.class
 module-info.class
+com\pbl4\monitor\Main.class
 com\pbl4\monitor\SystemInfo.class
+com\pbl4\utils\ProcessesUtil.class
+com\pbl4\views\Metrics.class
+com\pbl4\models\CpuInfo.class
+com\pbl4\models\HostProcess.class
+com\pbl4\utils\CoresManager.class
+com\pbl4\views\MainStage.class

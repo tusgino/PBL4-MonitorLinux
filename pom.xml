@@ -31,7 +31,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.4</version>
                 <configuration>
-                    <mainClass>com.pbl4.monitor.App</mainClass>
+                    <mainClass>com.pbl4.monitor.Main</mainClass>
                 </configuration>
                 <executions>
                     <execution>
