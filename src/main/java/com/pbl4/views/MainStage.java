@@ -278,8 +278,11 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 		addTab("Processes", initTabProcesses());
 		addTab("Resources", initTabResources());
-		detailTab = new Tab("Detail", initTabDetails());
-		center.getTabs().add(detailTab);
+		{
+			detailTab = new Tab("Detail", initTabDetails());
+			detailTab.setClosable(false);
+			center.getTabs().add(detailTab);
+		}
 
 		HBox centerContainer = new HBox(center);
 		centerContainer.setPadding(new Insets(0, 10, 10, 10));
@@ -438,6 +441,9 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		ListView<HostProcess> processListView = new ListView<>();
 		processListView.setItems(observableProcessList);
 
+
+		ListView<String> processListNameView = new ListView<>();
+		processListNameView.setItems(FXCollections.observableArrayList(monitoredProcesses.keySet()));
 		VBox detailsContainer = new VBox();
 
 		if (observableProcessList.isEmpty()) { // Sửa ở đây
@@ -455,11 +461,8 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 					String processName = selectedProcess.getReadableName(); // Lấy tên từ đối tượng HostProcess
 					Label processLabel = new Label(processName);
 
-					NumberAxis xAxis = new NumberAxis();
-					NumberAxis yAxis = new NumberAxis(0, 100, 30);
-
-					LineChart<Number, Number> cpuChart = new LineChart<>(xAxis, yAxis);
-					LineChart<Number, Number> memChart = new LineChart<>(xAxis, yAxis);
+					LineChart<Number, Number> cpuChart = new LineChart<>(new NumberAxis(), new NumberAxis(0, 100, 10));
+					LineChart<Number, Number> memChart = new LineChart<>(new NumberAxis(), new NumberAxis(0, 100, 10));
 
 					XYChart.Series cpuSeries = new XYChart.Series();
 					cpuSeries.setName("CPU Usage");
@@ -483,8 +486,9 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 			});
 
 			SplitPane splitPane = new SplitPane();
+
 			splitPane.getItems().addAll(processListView, detailsPane);
-			splitPane.setDividerPositions(0.3); // Đặt vị trí chia màn hình (có thể điều chỉnh)
+			splitPane.setDividerPositions(0.2); // Đặt vị trí chia màn hình (có thể điều chỉnh)
 
 			detailsContainer.getChildren().add(splitPane);
 		}
