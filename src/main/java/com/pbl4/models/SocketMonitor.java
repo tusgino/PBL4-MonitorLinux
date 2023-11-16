@@ -1,22 +1,22 @@
 package com.pbl4.models;
 
 public class SocketMonitor {
-    private Integer netID; // TCP = 0 or UDP = 1
-    public Integer getNetID() {
+    private String netID; // TCP = 0 or UDP = 1
+    public String getNetID() {
         return netID;
     }
 
-    public void setNetID(Integer netID) {
+    public void setNetID(String netID) {
         this.netID = netID;
     }
-
-    private String state; 
-    public String getstate() {
-        return state;
+    public String temp = "2222"; 
+    private String stateProp; 
+    public String getstateProp() {
+        return stateProp;
     }
 
-    public void setstate(String state) {
-        this.state = state;
+    public void setstateProp(String stateProp) {
+        this.stateProp = stateProp;
     }
 
     public Long getSend_Q() {
@@ -48,7 +48,7 @@ public class SocketMonitor {
     private String localAddress;
     private Integer localPort;
     public Integer getLocalPort() {
-        return localPort;
+        return this.localPort;
     }
 
     public void setLocalPort(Integer localPort) {
