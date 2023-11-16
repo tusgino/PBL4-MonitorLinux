@@ -11,9 +11,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 
-/**
- *
- * @author ADMIN
+/*
+ * Properties of a process in linux OS
  */
 public class HostProcess {
 
@@ -25,7 +24,17 @@ public class HostProcess {
     private String start;
     private String time;
     private String readableName;
+    
     private boolean monitored;
+    private Long timeStartFollow;
+    
+    public Long getTimeStartFollow() {
+        return timeStartFollow;
+    }
+
+    public void setTimeStartFollow(Long timeStartFollow) {
+        this.timeStartFollow = timeStartFollow;
+    }
 
     private List<Long> memoryLogs;
     private BooleanProperty mProperty;

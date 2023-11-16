@@ -9,7 +9,7 @@ import javafx.scene.control.Label;
 
 /**
  *
- * @author ADMIN
+ * Properties of a Cpu info in linux OS
  */
 public class CpuInfo {
 	private long idle = 0; // CPU Idle time

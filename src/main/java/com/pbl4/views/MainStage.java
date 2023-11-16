@@ -5,9 +5,12 @@ import com.pbl4.models.HostProcess;
 import com.pbl4.utils.CoresManager;
 import com.pbl4.utils.ProcessesUtil;
 import com.sun.management.OperatingSystemMXBean;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -39,10 +45,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
@@ -59,6 +67,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -68,6 +77,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
 /**
  *
@@ -112,11 +122,17 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 	private TableView<HostProcess> viewProcesses;
 	private ContextMenu contextMenu;
 
+	private Tab detailTab;
+
 	private String filterString;
 
 	private int currentGraphPosition = 0;
 
 	private ScheduledExecutorService updateProcessesService;
+
+	/*
+	 * Handle event rchoose an option on contextMenu and tab "Process"
+	 */
 
 	private final EventHandler<ActionEvent> actionEventHandler = (ActionEvent actionEvent) -> {
 		String clickedId;
@@ -153,8 +169,10 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 			case "monitorep":
 				if (!hostProcess.isMonitored()) {
 					hostProcess.setMonitored(true);
+					hostProcess.setTimeStartFollow(System.currentTimeMillis());
 					monitoredProcesses.put(hostProcess.getKey(), hostProcess);
 					viewProcesses.refresh();
+					refreshDetailTab();
 				}
 				break;
 			case "smonitorep":
@@ -175,6 +193,10 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 				break;
 		}
 	};
+
+	/*
+	 * Handle event right-click on HostProcess in Tab "Process"
+	 */
 
 	private final EventHandler<MouseEvent> mouseEventHandler = (MouseEvent mouseEvent) -> {
 		if (mouseEvent.isSecondaryButtonDown()) {
@@ -264,6 +286,11 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 		addTab("Processes", initTabProcesses());
 		addTab("Resources", initTabResources());
+		{
+			detailTab = new Tab("Detail", initTabDetails());
+			detailTab.setClosable(false);
+			center.getTabs().add(detailTab);
+		}
 
 		HBox centerContainer = new HBox(center);
 		centerContainer.setPadding(new Insets(0, 10, 10, 10));
@@ -271,6 +298,11 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 				.setBackground(new Background(new BackgroundFill(Color.gray(0.865), CornerRadii.EMPTY, Insets.EMPTY)));
 
 		layoutPane.setCenter(centerContainer);
+	}
+
+	private void refreshDetailTab(){
+		VBox detailContainer = (VBox)initTabDetails();
+		detailTab.setContent(detailContainer);
 	}
 
 	private void addTab(String tabTitle, Node tabContent) {
@@ -411,6 +443,98 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		return new VBox(viewProcesses, hBoxOptions);
 	}
 
+	private Node initTabDetails() {
+		// Tạo ListView để hiển thị danh sách các tiến trình
+		ObservableList<HostProcess> observableProcessList = FXCollections.observableArrayList(monitoredProcesses.values());
+		ListView<HostProcess> processListView = new ListView<>();
+		processListView.setItems(observableProcessList);
+
+
+		ListView<String> processListNameView = new ListView<>();
+		processListNameView.setItems(FXCollections.observableArrayList(monitoredProcesses.keySet()));
+		VBox detailsContainer = new VBox();
+
+		if (observableProcessList.isEmpty()) { // Sửa ở đây
+			Label emptyLabel = new Label("No processes available");
+			detailsContainer.getChildren().add(emptyLabel);
+		} else {
+
+			// Tạo một StackPane để hiển thị thông tin chi tiết của tiến trình được chọn
+			StackPane detailsPane = new StackPane();
+
+			// Đặt một listener cho sự kiện selection của ListView
+			processListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+				if (newValue != null) {
+					HostProcess selectedProcess = newValue; // newValue là một đối tượng HostProcess
+					String processName = selectedProcess.getReadableName(); // Lấy tên từ đối tượng HostProcess
+					Label processLabel = new Label(processName);
+
+					LineChart<Number, Number> cpuChart = new LineChart<>(new NumberAxis(), new NumberAxis(0, 100, 10));
+					LineChart<Number, Number> memChart = new LineChart<>(new NumberAxis(), new NumberAxis(0, 100, 10));
+
+					XYChart.Series cpuSeries = new XYChart.Series();
+					cpuSeries.setName("CPU Usage");
+					cpuChart.getData().add(cpuSeries);
+
+					XYChart.Series memSeries = new XYChart.Series();
+					memSeries.setName("Memory Usage");
+					memChart.getData().add(memSeries);
+
+					HBox processBox = new HBox(processLabel, cpuChart, memChart);
+					processBox.setSpacing(10);
+
+					Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+						updateCharts(cpuChart, memChart, selectedProcess);
+					}));
+					timeline.setCycleCount(Timeline.INDEFINITE);
+					timeline.play();
+
+					detailsPane.getChildren().setAll(processBox);
+				}
+			});
+
+			SplitPane splitPane = new SplitPane();
+
+			splitPane.getItems().addAll(processListView, detailsPane);
+			splitPane.setDividerPositions(0.2); // Đặt vị trí chia màn hình (có thể điều chỉnh)
+
+			detailsContainer.getChildren().add(splitPane);
+		}
+
+		return detailsContainer;
+	}
+
+	private void updateCharts(LineChart<Number, Number> cpuChart, LineChart<Number, Number> memChart,
+			HostProcess selectedProcess) {
+		try {
+			double cpuUsage = Double.parseDouble(selectedProcess.getCPU());
+			double memoryUsage = Double.parseDouble(selectedProcess.getMEM());
+			long currentTime = System.currentTimeMillis();
+
+			// Cập nhật dữ liệu đồ thị CPU
+			XYChart.Series cpuSeries = cpuChart.getData().get(0);
+			cpuSeries.getData()
+					.add(new XYChart.Data<>((currentTime - selectedProcess.getTimeStartFollow()) / 1000, cpuUsage));
+if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu gần nhất, ví dụ 1 phút dữ liệu
+				cpuSeries.getData().remove(0);
+			}
+
+			// Cập nhật dữ liệu đồ thị Memory
+			XYChart.Series memSeries = memChart.getData().get(0);
+			memSeries.getData()
+					.add(new XYChart.Data<>((currentTime - selectedProcess.getTimeStartFollow()) / 1000, memoryUsage));
+			if (memSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu gần nhất
+				memSeries.getData().remove(0);
+			}
+
+			System.out.println(cpuUsage + " " + memoryUsage);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			// Handle the exception accordingly, e.g., logging or showing an error message
+			// to the user
+		}
+	}
+	
 	private MenuItem createMenuItem(String title, String id) {
 		MenuItem menuItem = new MenuItem(title);
 		menuItem.setId(id);
