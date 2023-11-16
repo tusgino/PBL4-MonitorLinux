@@ -6,6 +6,7 @@
 
 package com.pbl4.monitor;
 
+import com.pbl4.utils.SocketMonitorManager;
 import com.pbl4.views.MainStage;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -28,6 +29,7 @@ public class Main extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+        SocketMonitorManager socketMonitorManager = new SocketMonitorManager();
     }
 
 }
