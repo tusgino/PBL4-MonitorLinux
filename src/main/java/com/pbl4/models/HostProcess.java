@@ -11,9 +11,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.SimpleBooleanProperty;
 
-/**
- *
- * @author ADMIN
+/*
+ * Properties of a process in linux OS
  */
 public class HostProcess {
 

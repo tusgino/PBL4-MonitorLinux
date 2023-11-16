@@ -130,6 +130,10 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 	private ScheduledExecutorService updateProcessesService;
 
+	/*
+	 * Handle event rchoose an option on contextMenu and tab "Process"
+	 */
+
 	private final EventHandler<ActionEvent> actionEventHandler = (ActionEvent actionEvent) -> {
 		String clickedId;
 		if (actionEvent.getSource() instanceof CheckBox) {
@@ -189,6 +193,10 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 				break;
 		}
 	};
+
+	/*
+	 * Handle event right-click on HostProcess in Tab "Process"
+	 */
 
 	private final EventHandler<MouseEvent> mouseEventHandler = (MouseEvent mouseEvent) -> {
 		if (mouseEvent.isSecondaryButtonDown()) {
@@ -652,9 +660,6 @@ if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu g�
 		delayCount += LOOP_DELAY;
 
 		Platform.runLater(this::backgroudFinishCallback);
-
-		//if(!monitoredProcesses.isEmpty())
-		//	refreshDetailTab();
 	}
 
 	@Override
