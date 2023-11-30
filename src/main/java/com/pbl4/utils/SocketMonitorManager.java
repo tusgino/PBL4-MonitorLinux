@@ -12,7 +12,6 @@ public class SocketMonitorManager {
     private static final HashMap<String, SocketMonitor> sockets = new HashMap<>();
 
     public SocketMonitorManager() {
-        
         Test();
     }
 
@@ -20,7 +19,7 @@ public class SocketMonitorManager {
         try {
             String socketLine;
             Process p;
-            p = Runtime.getRuntime().exec("ss -tulpn");
+            p = Runtime.getRuntime().exec("sudo ss -tulpn");
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
             socketLine = input.readLine();
