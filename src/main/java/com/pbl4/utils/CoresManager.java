@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  *
- * @author dhiogoboza
+ * @author tugino & huanmd
  */
 public class CoresManager {
     // private static long PREV_IDLE; //CPU Idle time

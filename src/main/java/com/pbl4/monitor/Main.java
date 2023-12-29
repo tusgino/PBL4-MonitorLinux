@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 /**
  *
- * @author dhiogoboza
+ * @author tugino & huanmd
  */
 public class Main extends Application {
     private MainStage mainStage;
@@ -32,11 +32,11 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
         // try {
-        //     Process p = Runtime.getRuntime().exec("sudo su");
-        //     p = Runtime.getRuntime().exec("osboxes.org");
+        // Process p = Runtime.getRuntime().exec("sudo su");
+        // p = Runtime.getRuntime().exec("osboxes.org");
         // } catch (IOException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
         // }
         SocketMonitorManager socketMonitorManager = new SocketMonitorManager();
     }

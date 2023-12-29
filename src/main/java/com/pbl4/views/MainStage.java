@@ -84,7 +84,7 @@ import javafx.util.Duration;
 
 /**
  *
- * @author dhiogoboza
+ * @author tugino & huanmd
  */
 public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeListener<String> {
 
@@ -115,7 +115,6 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 	public ObservableList<SocketMonitor> userSocketsList = FXCollections.observableArrayList();
 	private HashMap<String, SocketMonitor> monitoredSockets = new HashMap<>();
 
-
 	private CoresManager coresManager;
 	private LineChart<Number, Number> cpuChart;
 	private LineChart<Number, Number> memoryChart;
@@ -132,7 +131,6 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 	private Tab detailTab;
 
 	private TableView<SocketMonitor> viewSockets;
-
 
 	private String filterString;
 
@@ -232,14 +230,16 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 		myStage.widthProperty().addListener(new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+			public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth,
+					Number newSceneWidth) {
 				updateDimensions();
 			}
 		});
 
 		myStage.heightProperty().addListener(new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+			public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight,
+					Number newSceneHeight) {
 				updateDimensions();
 			}
 		});
@@ -345,11 +345,12 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 		stateCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getstateProp()));
 
-		//memCol.setCellValueFactory(new PropertyValueFactory<>("MEM"));
-		
+		// memCol.setCellValueFactory(new PropertyValueFactory<>("MEM"));
+
 		viewSockets = new TableView<>();
 		viewSockets.setEditable(false);
-		viewSockets.getColumns().addAll(netIDCol, stateCol, recv_qCol, send_qCol, localAddressCol, localPortCol, peerAddressCol, peerPortCol, hostProcessCol);
+		viewSockets.getColumns().addAll(netIDCol, stateCol, recv_qCol, send_qCol, localAddressCol, localPortCol,
+				peerAddressCol, peerPortCol, hostProcessCol);
 		viewSockets.setItems(userSocketsList);
 
 		inputFilter = new TextField();
@@ -371,8 +372,8 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		return new VBox(viewSockets);
 	}
 
-	private void refreshDetailTab(){
-		VBox detailContainer = (VBox)initTabDetails();
+	private void refreshDetailTab() {
+		VBox detailContainer = (VBox) initTabDetails();
 		detailTab.setContent(detailContainer);
 	}
 
@@ -520,7 +521,6 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		ListView<HostProcess> processListView = new ListView<>();
 		processListView.setItems(observableProcessList);
 
-
 		ListView<String> processListNameView = new ListView<>();
 		processListNameView.setItems(FXCollections.observableArrayList(monitoredProcesses.keySet()));
 		VBox detailsContainer = new VBox();
@@ -586,7 +586,7 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 			XYChart.Series cpuSeries = cpuChart.getData().get(0);
 			cpuSeries.getData()
 					.add(new XYChart.Data<>((currentTime - selectedProcess.getTimeStartFollow()) / 1000, cpuUsage));
-if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu gần nhất, ví dụ 1 phút dữ liệu
+			if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu gần nhất, ví dụ 1 phút dữ liệu
 				cpuSeries.getData().remove(0);
 			}
 
@@ -605,7 +605,7 @@ if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu g�
 			// to the user
 		}
 	}
-	
+
 	private MenuItem createMenuItem(String title, String id) {
 		MenuItem menuItem = new MenuItem(title);
 		menuItem.setId(id);
@@ -658,7 +658,6 @@ if (cpuSeries.getData().size() > 60) { // giữ chỉ 60 điểm dữ liệu g�
 		SocketMonitorManager.getSocketsInfo(userSocketsList, monitoredSockets);
 
 		viewSockets.setItems(userSocketsList);
-		
 
 		viewSockets.sort();
 		viewSockets.getSelectionModel().select(current);

@@ -7,7 +7,7 @@ import javafx.scene.layout.HBox;
 
 /**
  *
- * @author dhiogoboza
+ * @author tugino & huanmd
  */
 public class ProcessCell extends ListCell<HostProcess> {
 
