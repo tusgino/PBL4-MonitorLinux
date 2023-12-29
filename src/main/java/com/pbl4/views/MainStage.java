@@ -2,8 +2,10 @@ package com.pbl4.views;
 
 import com.pbl4.models.CpuInfo;
 import com.pbl4.models.HostProcess;
+import com.pbl4.models.SocketMonitor;
 import com.pbl4.utils.CoresManager;
 import com.pbl4.utils.ProcessesUtil;
+import com.pbl4.utils.SocketMonitorManager;
 import com.sun.management.OperatingSystemMXBean;
 
 import java.io.BufferedReader;
@@ -25,6 +27,7 @@ import java.util.logging.Logger;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -109,6 +112,9 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 
 	private HashMap<String, HostProcess> monitoredProcesses = new HashMap<>();
 
+	public ObservableList<SocketMonitor> userSocketsList = FXCollections.observableArrayList();
+	private HashMap<String, SocketMonitor> monitoredSockets = new HashMap<>();
+
 	private CoresManager coresManager;
 	private LineChart<Number, Number> cpuChart;
 	private LineChart<Number, Number> memoryChart;
@@ -123,6 +129,8 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 	private ContextMenu contextMenu;
 
 	private Tab detailTab;
+
+	private TableView<SocketMonitor> viewSockets;
 
 	private String filterString;
 
@@ -293,6 +301,7 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 			detailTab.setClosable(false);
 			center.getTabs().add(detailTab);
 		}
+		addTab("Network", initTabNetwork());
 
 		HBox centerContainer = new HBox(center);
 		centerContainer.setPadding(new Insets(0, 10, 10, 10));
@@ -300,6 +309,67 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 				.setBackground(new Background(new BackgroundFill(Color.gray(0.865), CornerRadii.EMPTY, Insets.EMPTY)));
 
 		layoutPane.setCenter(centerContainer);
+	}
+
+	private Node initTabNetwork() {
+		userSocketsList = FXCollections.observableArrayList();
+
+		SocketMonitorManager.getSocketsInfo(userSocketsList, monitoredSockets);
+
+		TableColumn<SocketMonitor, String> netIDCol = new TableColumn<>("Net ID");
+		TableColumn<SocketMonitor, Long> recv_qCol = new TableColumn<>("Receive Queued");
+		TableColumn<SocketMonitor, String> stateCol = new TableColumn<>("State");
+		TableColumn<SocketMonitor, Long> send_qCol = new TableColumn<>("Send Queued");
+		TableColumn<SocketMonitor, String> localAddressCol = new TableColumn<>("Local Address");
+		TableColumn<SocketMonitor, Integer> localPortCol = new TableColumn<>("Local port");
+
+		TableColumn<SocketMonitor, String> peerAddressCol = new TableColumn<>("Peer Address");
+		TableColumn<SocketMonitor, Integer> peerPortCol = new TableColumn<>("Peer port");
+		TableColumn<SocketMonitor, String> hostProcessCol = new TableColumn<>("Process");
+
+		netIDCol.setCellValueFactory(new PropertyValueFactory<>("netID"));
+
+		recv_qCol.setCellValueFactory(new PropertyValueFactory<>("recv_Q"));
+
+		send_qCol.setCellValueFactory(new PropertyValueFactory<>("send_Q"));
+
+		localAddressCol.setCellValueFactory(new PropertyValueFactory<>("localAddress"));
+
+		localPortCol.setCellValueFactory(new PropertyValueFactory<>("localPort"));
+
+		peerAddressCol.setCellValueFactory(new PropertyValueFactory<>("peerAddress"));
+
+		peerPortCol.setCellValueFactory(new PropertyValueFactory<>("peerPort"));
+
+		hostProcessCol.setCellValueFactory(new PropertyValueFactory<>("hostProcess"));
+
+		stateCol.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getstateProp()));
+
+		// memCol.setCellValueFactory(new PropertyValueFactory<>("MEM"));
+
+		viewSockets = new TableView<>();
+		viewSockets.setEditable(false);
+		viewSockets.getColumns().addAll(netIDCol, stateCol, recv_qCol, send_qCol, localAddressCol, localPortCol,
+				peerAddressCol, peerPortCol, hostProcessCol);
+		viewSockets.setItems(userSocketsList);
+
+		inputFilter = new TextField();
+		inputFilter.textProperty().addListener(this);
+
+		Label labelFilter = new Label("Filter:");
+		labelFilter.setPadding(new Insets(0, 10, 0, 0));
+
+		HBox hBoxFilter = new HBox(labelFilter, inputFilter);
+		hBoxFilter.setAlignment(Pos.BASELINE_RIGHT);
+		HBox.setHgrow(hBoxFilter, Priority.ALWAYS);
+
+		HBox hBoxOptions = new HBox(checkBoxAllProcesses, hBoxFilter);
+		hBoxOptions.setPrefWidth(prefWidth);
+		hBoxOptions.setPadding(new Insets(10));
+
+		VBox.setVgrow(viewSockets, Priority.ALWAYS);
+
+		return new VBox(viewSockets);
 	}
 
 	private void refreshDetailTab() {
@@ -580,6 +650,20 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		viewProcesses.refresh();
 	}
 
+	private void updateNetwork() {
+		int current = viewSockets.getSelectionModel().getSelectedIndex();
+
+		userSocketsList = FXCollections.observableArrayList();
+
+		SocketMonitorManager.getSocketsInfo(userSocketsList, monitoredSockets);
+
+		viewSockets.setItems(userSocketsList);
+
+		viewSockets.sort();
+		viewSockets.getSelectionModel().select(current);
+		viewSockets.refresh();
+	}
+
 	private void backgroudFinishCallback() {
 		HashMap<String, CpuInfo> cpus = coresManager.getCPUsInfo();
 
@@ -639,6 +723,7 @@ public class MainStage implements Runnable, EventHandler<WindowEvent>, ChangeLis
 		if (delayCount == DELAY_PROCESSES) {
 			delayCount = 0;
 			updateProcesses();
+			updateNetwork();
 
 			HashSet<String> toRemove = new HashSet<>();
 

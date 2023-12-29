@@ -6,6 +6,9 @@
 
 package com.pbl4.monitor;
 
+import java.io.IOException;
+
+import com.pbl4.utils.SocketMonitorManager;
 import com.pbl4.views.MainStage;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -28,6 +31,14 @@ public class Main extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+        // try {
+        // Process p = Runtime.getRuntime().exec("sudo su");
+        // p = Runtime.getRuntime().exec("osboxes.org");
+        // } catch (IOException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
+        SocketMonitorManager socketMonitorManager = new SocketMonitorManager();
     }
 
 }
