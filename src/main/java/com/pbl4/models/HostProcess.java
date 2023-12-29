@@ -24,10 +24,10 @@ public class HostProcess {
     private String start;
     private String time;
     private String readableName;
-    
+
     private boolean monitored;
     private Long timeStartFollow;
-    
+
     public Long getTimeStartFollow() {
         return timeStartFollow;
     }

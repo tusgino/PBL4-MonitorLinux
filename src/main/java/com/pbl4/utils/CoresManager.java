@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 /**
  *
- * @author dhiogoboza
+ * @author tugino & huanmd
  */
 public class CoresManager {
     // private static long PREV_IDLE; //CPU Idle time
@@ -59,12 +59,6 @@ public class CoresManager {
                     cpuInfo.setTotal(TOTAL);
                     cpuInfo.setIdle(IDLE);
                     cpuInfo.setUsage(DIFF_USAGE);
-                    // HashMap<String, Float> usageData2 = new HashMap<>();
-                    // usageData2.put("cpu", (float) DIFF_USAGE);
-
-                    // usageData.put(cpuName, usageData2);
-
-                    // System.out.println("-> " + cpuInfo.getName() + " = " + cpuInfo.getUsage());
                 }
             }
         } catch (IOException | NumberFormatException e) {
